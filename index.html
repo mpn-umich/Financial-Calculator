@@ -384,10 +384,11 @@
 
   .calc-expression {
     font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    color: rgba(245,243,239,0.4);
-    min-height: 18px;
+    font-size: 0.95rem;
+    color: rgba(245,243,239,0.75);
+    min-height: 22px;
     word-break: break-all;
+    letter-spacing: 0.02em;
   }
 
   .calc-display-value {
@@ -698,9 +699,12 @@
   function setResult(outId, value) {
     var el = document.getElementById(outId);
     el.className = 'result-value';
-    if (value === null) {
+    if (value === 'insufficient') {
       el.classList.add('error');
-      el.textContent = 'Please fill in all fields.';
+      el.textContent = 'Insufficient entries.';
+    } else if (value === null) {
+      el.classList.add('error');
+      el.textContent = 'Insufficient entries.';
     } else if (!isFinite(value)) {
       el.classList.add('error');
       el.textContent = 'Invalid inputs — check rate and periods.';
@@ -710,29 +714,60 @@
   }
 
   function solvePV() {
-    var r = val('pv-rate'), n = val('pv-n'), fv = val('pv-fv'), pmt = val('pv-pmt');
-    if (r === null || n === null || fv === null || pmt === null) { setResult('pv-out', null); return; }
+    var r = val('pv-rate'), n = val('pv-n');
+    var fv = val('pv-fv'), pmt = val('pv-pmt');
+    if (r === null || n === null) { setResult('pv-out', 'insufficient'); return; }
+    if (fv === null && pmt === null) { setResult('pv-out', 'insufficient'); return; }
+    fv  = fv  !== null ? fv  : 0;
+    pmt = pmt !== null ? pmt : 0;
     var rate = r / 100;
-    var pvFV = fv / Math.pow(1 + rate, n);
-    var pvPMT = rate === 0 ? pmt * n : pmt * (1 - Math.pow(1 + rate, -n)) / rate;
-    setResult('pv-out', pvFV + pvPMT);
+    // Exact Excel PV formula: PV = (-FV - PMT*((1+r)^n - 1)/r) / (1+r)^n
+    var fvn = Math.pow(1 + rate, n);
+    var pv;
+    if (rate === 0) {
+      pv = -fv - pmt * n;
+    } else {
+      pv = (-fv - pmt * (fvn - 1) / rate) / fvn;
+    }
+    setResult('pv-out', pv);
   }
 
   function solvePMT() {
-    var r = val('pmt-rate'), n = val('pmt-n'), fv = val('pmt-fv'), pv = val('pmt-pv');
-    if (r === null || n === null || fv === null || pv === null) { setResult('pmt-out', null); return; }
+    var r = val('pmt-rate'), n = val('pmt-n');
+    var fv = val('pmt-fv'), pv = val('pmt-pv');
+    if (r === null || n === null) { setResult('pmt-out', 'insufficient'); return; }
+    if (fv === null && pv === null) { setResult('pmt-out', 'insufficient'); return; }
+    fv = fv !== null ? fv : 0;
+    pv = pv !== null ? pv : 0;
     var rate = r / 100;
-    var pmt = rate === 0 ? (fv - pv) / n : (fv - pv * Math.pow(1 + rate, n)) / ((Math.pow(1 + rate, n) - 1) / rate);
+    // Exact Excel PMT formula: PMT = (-PV*(1+r)^n - FV) * r / ((1+r)^n - 1)
+    var fvn = Math.pow(1 + rate, n);
+    var pmt;
+    if (rate === 0) {
+      pmt = (-pv - fv) / n;
+    } else {
+      pmt = (-pv * fvn - fv) * rate / (fvn - 1);
+    }
     setResult('pmt-out', pmt);
   }
 
   function solveFV() {
-    var r = val('fv-rate'), n = val('fv-n'), pv = val('fv-pv'), pmt = val('fv-pmt');
-    if (r === null || n === null || pv === null || pmt === null) { setResult('fv-out', null); return; }
+    var r = val('fv-rate'), n = val('fv-n');
+    var pv = val('fv-pv'), pmt = val('fv-pmt');
+    if (r === null || n === null) { setResult('fv-out', 'insufficient'); return; }
+    if (pv === null && pmt === null) { setResult('fv-out', 'insufficient'); return; }
+    pv  = pv  !== null ? pv  : 0;
+    pmt = pmt !== null ? pmt : 0;
     var rate = r / 100;
-    var fvPV = pv * Math.pow(1 + rate, n);
-    var fvPMT = rate === 0 ? pmt * n : pmt * (Math.pow(1 + rate, n) - 1) / rate;
-    setResult('fv-out', fvPV + fvPMT);
+    // Exact Excel FV formula: FV = -PV*(1+r)^n - PMT*((1+r)^n - 1)/r
+    var fvn = Math.pow(1 + rate, n);
+    var fv;
+    if (rate === 0) {
+      fv = -pv - pmt * n;
+    } else {
+      fv = -pv * fvn - pmt * (fvn - 1) / rate;
+    }
+    setResult('fv-out', fv);
   }
 
   function addCFRow() {
@@ -761,7 +796,7 @@
     outEl.className = 'result-value';
     if (r === null) {
       outEl.classList.add('error');
-      outEl.textContent = 'Enter a rate.';
+      outEl.textContent = 'Insufficient entries.';
       return;
     }
     var rate = r / 100;
@@ -774,7 +809,7 @@
     }
     if (!anyFound) {
       outEl.classList.add('error');
-      outEl.textContent = 'Enter at least one cash flow.';
+      outEl.textContent = 'Insufficient entries.';
       return;
     }
     outEl.textContent = (total < 0 ? '-' : '') + '$' + fmt(Math.abs(total));
