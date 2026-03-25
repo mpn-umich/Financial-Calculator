@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Financial Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f3ef;
+    --surface: #ffffff;
+    --surface-2: #f0ede8;
+    --border: #e0dbd3;
+    --border-strong: #c8c2b8;
+    --text-primary: #1a1814;
+    --text-secondary: #6b6560;
+    --text-muted: #9e9790;
+    --accent: #1a1814;
+    --accent-light: #f0ede8;
+    --result-bg: #1a1814;
+    --result-text: #f5f3ef;
+    --error: #b84040;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  header {
+    padding: 2.5rem 2rem 2rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .header-inner {
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-mark svg { width: 18px; height: 18px; }
+
+  .site-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+
+  .site-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  /* Main layout */
+  main {
+    flex: 1;
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  /* Tab bar */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 2rem;
+    background: var(--surface-2);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+
+  .tab {
+    flex: 1;
+    padding: 9px 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.02em;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .tab:hover:not(.active) {
+    background: var(--surface);
+    color: var(--text-primary);
+  }
+
+  .tab.active {
+    background: var(--surface);
+    color: var(--text-primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  /* Panel */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+  }
+
+  /* Field grid */
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .field label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .field input {
+    height: 44px;
+    padding: 0 14px;
+    font-size: 0.95rem;
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text-primary);
+    width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    -moz-appearance: textfield;
+  }
+
+  .field input::-webkit-outer-spin-button,
+  .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .field input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(26,24,20,0.07);
+    background: var(--surface);
+  }
+
+  .field input::placeholder { color: var(--text-muted); }
+
+  /* Solve button */
+  .solve-btn {
+    width: 100%;
+    height: 46px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.04em;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--result-bg);
+    color: var(--result-text);
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .solve-btn:hover { opacity: 0.88; }
+  .solve-btn:active { transform: scale(0.99); }
+
+  /* Result box */
+  .result-box {
+    background: var(--result-bg);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 72px;
+  }
+
+  .result-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(245,243,239,0.45);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .result-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.9rem;
+    font-weight: 500;
+    color: var(--result-text);
+    letter-spacing: -0.02em;
+  }
+
+  .result-value.error {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #e08080;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0;
+  }
+
+  /* Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+
+  /* Rate row for CF panel */
+  .rate-single {
+    max-width: 240px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* CF rows */
+  .cf-rows { margin-bottom: 1rem; }
+
+  .cf-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 36px;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .cf-row label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+  }
+
+  .cf-row input {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 0.9rem;
+    font-family: 'DM Mono', monospace;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text-primary);
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+
+  .cf-row input::-webkit-outer-spin-button,
+  .cf-row input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .cf-row input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(26,24,20,0.07);
+    background: var(--surface);
+  }
+
+  .cf-row input::placeholder { color: var(--text-muted); }
+
+  .remove-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .remove-btn:hover {
+    background: #fce8e8;
+    border-color: #e0b0b0;
+    color: var(--error);
+  }
+
+  .add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.02em;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    transition: all 0.15s;
+  }
+
+  .add-btn:hover {
+    background: var(--surface-2);
+    color: var(--text-primary);
+    border-style: solid;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 1.5rem 2rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  /* 4-function calculator */
+  .calc-display {
+    background: var(--result-bg);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    text-align: right;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .calc-expression {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    color: rgba(245,243,239,0.75);
+    min-height: 22px;
+    word-break: break-all;
+    letter-spacing: 0.02em;
+  }
+
+  .calc-display-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 2.2rem;
+    font-weight: 500;
+    color: var(--result-text);
+    letter-spacing: -0.02em;
+    word-break: break-all;
+  }
+
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .key {
+    height: 56px;
+    font-size: 1.05rem;
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.12s, transform 0.08s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .key:hover { background: var(--surface-2); }
+  .key:active { transform: scale(0.95); background: var(--border); }
+
+  .key.op {
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+  }
+
+  .key.op:hover { background: var(--surface-2); color: var(--text-primary); }
+
+  .key.equals {
+    background: var(--result-bg);
+    color: var(--result-text);
+    border-color: var(--result-bg);
+    font-size: 1.3rem;
+  }
+
+  .key.equals:hover { opacity: 0.85; }
+
+  .key.clear {
+    background: var(--surface);
+    color: var(--error);
+    border-color: var(--border);
+    font-size: 0.85rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  .key.clear:hover { background: #fce8e8; border-color: #e0b0b0; }
+
+  .key.span2 { grid-column: span 2; }
+
+  @media (max-width: 600px) {
+    header { padding: 1.5rem 1.25rem 1.25rem; }
+    main { padding: 1.75rem 1.25rem 3rem; }
+    .card { padding: 1.5rem 1.25rem; }
+    .field-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .tab { font-size: 0.72rem; padding: 8px 6px; }
+    .result-value { font-size: 1.5rem; }
+    .cf-row { grid-template-columns: 90px 1fr 32px; }
+  }
+
+  /* Fade-in animation */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card { animation: fadeUp 0.35s ease both; }
+  .tab-bar { animation: fadeUp 0.25s ease both; }
+  .header-inner { animation: fadeUp 0.2s ease both; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="logo-mark">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="6" height="6" rx="1" fill="#f5f3ef"/>
+          <rect x="10" y="2" width="6" height="6" rx="1" fill="#f5f3ef" opacity="0.5"/>
+          <rect x="2" y="10" width="6" height="6" rx="1" fill="#f5f3ef" opacity="0.5"/>
+          <rect x="10" y="10" width="6" height="6" rx="1" fill="#f5f3ef"/>
+        </svg>
+      </div>
+      <div>
+        <div class="site-subtitle">Time Value of Money</div>
+        <div class="site-title">Simple Financial Calculator</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('pv')">Solve for PV</button>
+    <button class="tab" onclick="switchTab('pmt')">Solve for PMT</button>
+    <button class="tab" onclick="switchTab('fv')">Solve for FV</button>
+    <button class="tab" onclick="switchTab('pvcf')">PV — Irregular CFs</button>
+    <button class="tab" onclick="switchTab('basic')">4-Function Calculator</button>
+  </div>
+
+  <!-- PV Panel -->
+  <div id="panel-pv" class="panel active">
+    <div class="card">
+      <div class="field-grid">
+        <div class="field">
+          <label>Rate (%)</label>
+          <input type="number" id="pv-rate" placeholder="e.g. 5">
+        </div>
+        <div class="field">
+          <label>Periods (N)</label>
+          <input type="number" id="pv-n" placeholder="e.g. 10">
+        </div>
+        <div class="field">
+          <label>FV</label>
+          <input type="number" id="pv-fv" placeholder="e.g. 1000">
+        </div>
+        <div class="field">
+          <label>PMT (per period)</label>
+          <input type="number" id="pv-pmt" placeholder="e.g. 50">
+        </div>
+      </div>
+      <button class="solve-btn" onclick="solvePV()">Calculate Present Value</button>
+      <div class="result-box">
+        <div class="result-label">Present Value</div>
+        <div class="result-value" id="pv-out">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PMT Panel -->
+  <div id="panel-pmt" class="panel">
+    <div class="card">
+      <div class="field-grid">
+        <div class="field">
+          <label>Rate (%)</label>
+          <input type="number" id="pmt-rate" placeholder="e.g. 5">
+        </div>
+        <div class="field">
+          <label>Periods (N)</label>
+          <input type="number" id="pmt-n" placeholder="e.g. 10">
+        </div>
+        <div class="field">
+          <label>FV</label>
+          <input type="number" id="pmt-fv" placeholder="e.g. 1000">
+        </div>
+        <div class="field">
+          <label>PV</label>
+          <input type="number" id="pmt-pv" placeholder="e.g. 800">
+        </div>
+      </div>
+      <button class="solve-btn" onclick="solvePMT()">Calculate Payment (PMT)</button>
+      <div class="result-box">
+        <div class="result-label">Payment per Period</div>
+        <div class="result-value" id="pmt-out">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FV Panel -->
+  <div id="panel-fv" class="panel">
+    <div class="card">
+      <div class="field-grid">
+        <div class="field">
+          <label>Rate (%)</label>
+          <input type="number" id="fv-rate" placeholder="e.g. 5">
+        </div>
+        <div class="field">
+          <label>Periods (N)</label>
+          <input type="number" id="fv-n" placeholder="e.g. 10">
+        </div>
+        <div class="field">
+          <label>PV</label>
+          <input type="number" id="fv-pv" placeholder="e.g. 500">
+        </div>
+        <div class="field">
+          <label>PMT (per period)</label>
+          <input type="number" id="fv-pmt" placeholder="e.g. 50">
+        </div>
+      </div>
+      <button class="solve-btn" onclick="solveFV()">Calculate Future Value</button>
+      <div class="result-box">
+        <div class="result-label">Future Value</div>
+        <div class="result-value" id="fv-out">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PV Irregular CFs Panel -->
+  <div id="panel-pvcf" class="panel">
+    <div class="card">
+      <div class="rate-single">
+        <div class="field">
+          <label>Rate (%)</label>
+          <input type="number" id="cf-rate" placeholder="e.g. 8">
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="cf-rows" id="cf-rows">
+        <div class="cf-row">
+          <label>Period 0 CF</label>
+          <input type="number" placeholder="e.g. -1000" id="cf-0">
+          <span></span>
+        </div>
+        <div class="cf-row">
+          <label>Period 1 CF</label>
+          <input type="number" placeholder="e.g. 300" id="cf-1">
+          <span></span>
+        </div>
+        <div class="cf-row">
+          <label>Period 2 CF</label>
+          <input type="number" placeholder="e.g. 400" id="cf-2">
+          <span></span>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addCFRow()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Add period
+      </button>
+      <button class="solve-btn" onclick="solvePVCF()">Calculate Present Value</button>
+      <div class="result-box">
+        <div class="result-label">Present Value of Cash Flows</div>
+        <div class="result-value" id="pvcf-out">—</div>
+      </div>
+    </div>
+  </div>
+  <!-- 4-Function Calculator Panel -->
+  <div id="panel-basic" class="panel">
+    <div class="card" style="max-width: 360px; margin: 0 auto;">
+      <div class="calc-display">
+        <div class="calc-expression" id="basic-expr"></div>
+        <div class="calc-display-value" id="basic-display">0</div>
+      </div>
+      <div class="keypad">
+        <button class="key clear span2" onclick="basicClear()">Clear</button>
+        <button class="key op" onclick="basicDel()">&#9003;</button>
+        <button class="key op" onclick="basicOp('/')">÷</button>
+
+        <button class="key" onclick="basicNum('7')">7</button>
+        <button class="key" onclick="basicNum('8')">8</button>
+        <button class="key" onclick="basicNum('9')">9</button>
+        <button class="key op" onclick="basicOp('*')">×</button>
+
+        <button class="key" onclick="basicNum('4')">4</button>
+        <button class="key" onclick="basicNum('5')">5</button>
+        <button class="key" onclick="basicNum('6')">6</button>
+        <button class="key op" onclick="basicOp('-')">−</button>
+
+        <button class="key" onclick="basicNum('1')">1</button>
+        <button class="key" onclick="basicNum('2')">2</button>
+        <button class="key" onclick="basicNum('3')">3</button>
+        <button class="key op" onclick="basicOp('+')">+</button>
+
+        <button class="key span2" onclick="basicNum('0')">0</button>
+        <button class="key" onclick="basicDot()">.</button>
+        <button class="key equals" onclick="basicEquals()">=</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Ordinary annuity convention — payments at end of period &nbsp;·&nbsp; Inflows positive, outflows negative
+</footer>
+
+<script>
+  var cfCount = 3;
+
+  function switchTab(id) {
+    var ids = ['pv','pmt','fv','pvcf','basic'];
+    document.querySelectorAll('.tab').forEach(function(t, i) {
+      t.classList.toggle('active', ids[i] === id);
+    });
+    document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+    var panel = document.getElementById('panel-' + id);
+    panel.classList.add('active');
+    panel.querySelector('.card').style.animation = 'none';
+    panel.querySelector('.card').offsetHeight;
+    panel.querySelector('.card').style.animation = '';
+  }
+
+  function fmt(n) {
+    return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function val(id) {
+    var v = parseFloat(document.getElementById(id).value);
+    return isNaN(v) ? null : v;
+  }
+
+  function setResult(outId, value) {
+    var el = document.getElementById(outId);
+    el.className = 'result-value';
+    if (value === 'insufficient') {
+      el.classList.add('error');
+      el.textContent = 'Insufficient entries.';
+    } else if (value === null) {
+      el.classList.add('error');
+      el.textContent = 'Insufficient entries.';
+    } else if (!isFinite(value)) {
+      el.classList.add('error');
+      el.textContent = 'Invalid inputs — check rate and periods.';
+    } else {
+      el.textContent = (value < 0 ? '-' : '') + '$' + fmt(Math.abs(value));
+    }
+  }
+
+  function solvePV() {
+    var r = val('pv-rate'), n = val('pv-n');
+    var fv = val('pv-fv'), pmt = val('pv-pmt');
+    if (r === null || n === null) { setResult('pv-out', 'insufficient'); return; }
+    if (fv === null && pmt === null) { setResult('pv-out', 'insufficient'); return; }
+    fv  = fv  !== null ? fv  : 0;
+    pmt = pmt !== null ? pmt : 0;
+    var rate = r / 100;
+    // Exact Excel PV formula: PV = (-FV - PMT*((1+r)^n - 1)/r) / (1+r)^n
+    var fvn = Math.pow(1 + rate, n);
+    var pv;
+    if (rate === 0) {
+      pv = -fv - pmt * n;
+    } else {
+      pv = (-fv - pmt * (fvn - 1) / rate) / fvn;
+    }
+    setResult('pv-out', pv);
+  }
+
+  function solvePMT() {
+    var r = val('pmt-rate'), n = val('pmt-n');
+    var fv = val('pmt-fv'), pv = val('pmt-pv');
+    if (r === null || n === null) { setResult('pmt-out', 'insufficient'); return; }
+    if (fv === null && pv === null) { setResult('pmt-out', 'insufficient'); return; }
+    fv = fv !== null ? fv : 0;
+    pv = pv !== null ? pv : 0;
+    var rate = r / 100;
+    // Exact Excel PMT formula: PMT = (-PV*(1+r)^n - FV) * r / ((1+r)^n - 1)
+    var fvn = Math.pow(1 + rate, n);
+    var pmt;
+    if (rate === 0) {
+      pmt = (-pv - fv) / n;
+    } else {
+      pmt = (-pv * fvn - fv) * rate / (fvn - 1);
+    }
+    setResult('pmt-out', pmt);
+  }
+
+  function solveFV() {
+    var r = val('fv-rate'), n = val('fv-n');
+    var pv = val('fv-pv'), pmt = val('fv-pmt');
+    if (r === null || n === null) { setResult('fv-out', 'insufficient'); return; }
+    if (pv === null && pmt === null) { setResult('fv-out', 'insufficient'); return; }
+    pv  = pv  !== null ? pv  : 0;
+    pmt = pmt !== null ? pmt : 0;
+    var rate = r / 100;
+    // Exact Excel FV formula: FV = -PV*(1+r)^n - PMT*((1+r)^n - 1)/r
+    var fvn = Math.pow(1 + rate, n);
+    var fv;
+    if (rate === 0) {
+      fv = -pv - pmt * n;
+    } else {
+      fv = -pv * fvn - pmt * (fvn - 1) / rate;
+    }
+    setResult('fv-out', fv);
+  }
+
+  function addCFRow() {
+    var container = document.getElementById('cf-rows');
+    var row = document.createElement('div');
+    row.className = 'cf-row';
+    row.id = 'cfrow-' + cfCount;
+    row.style.animation = 'fadeUp 0.2s ease both';
+    row.innerHTML =
+      '<label>Period ' + cfCount + ' CF</label>' +
+      '<input type="number" placeholder="e.g. 0" id="cf-' + cfCount + '">' +
+      '<button class="remove-btn" onclick="removeCFRow(' + cfCount + ')" title="Remove">&times;</button>';
+    container.appendChild(row);
+    document.getElementById('cf-' + cfCount).focus();
+    cfCount++;
+  }
+
+  function removeCFRow(idx) {
+    var row = document.getElementById('cfrow-' + idx);
+    if (row) row.parentNode.removeChild(row);
+  }
+
+  function solvePVCF() {
+    var r = val('cf-rate');
+    var outEl = document.getElementById('pvcf-out');
+    outEl.className = 'result-value';
+    if (r === null) {
+      outEl.classList.add('error');
+      outEl.textContent = 'Insufficient entries.';
+      return;
+    }
+    var rate = r / 100;
+    var total = 0, anyFound = false;
+    for (var i = 0; i < cfCount; i++) {
+      var inp = document.getElementById('cf-' + i);
+      if (!inp) continue;
+      var v = parseFloat(inp.value);
+      if (!isNaN(v)) { anyFound = true; total += v / Math.pow(1 + rate, i); }
+    }
+    if (!anyFound) {
+      outEl.classList.add('error');
+      outEl.textContent = 'Insufficient entries.';
+      return;
+    }
+    outEl.textContent = (total < 0 ? '-' : '') + '$' + fmt(Math.abs(total));
+  }
+
+  // 4-function calculator state
+  var bCurrent = '0';
+  var bOperand = null;
+  var bOperator = null;
+  var bJustEvaled = false;
+
+  function basicRefresh() {
+    var el = document.getElementById('basic-display');
+    el.textContent = bCurrent.length > 12 ? parseFloat(bCurrent).toPrecision(8) : bCurrent;
+  }
+
+  function basicExpr(str) {
+    document.getElementById('basic-expr').textContent = str || '';
+  }
+
+  function basicNum(d) {
+    if (bJustEvaled) { bCurrent = d; bJustEvaled = false; basicExpr(''); basicRefresh(); return; }
+    if (bCurrent === '0' && d !== '.') bCurrent = d;
+    else if (bCurrent.length < 15) bCurrent += d;
+    basicRefresh();
+  }
+
+  function basicDot() {
+    if (bJustEvaled) { bCurrent = '0.'; bJustEvaled = false; basicExpr(''); basicRefresh(); return; }
+    if (bCurrent.indexOf('.') === -1) { bCurrent += '.'; basicRefresh(); }
+  }
+
+  function basicOp(op) {
+    var opLabel = op === '*' ? '×' : op === '/' ? '÷' : op === '-' ? '−' : '+';
+    if (bOperand !== null && !bJustEvaled) {
+      var res = compute(bOperand, parseFloat(bCurrent), bOperator);
+      bCurrent = trimNum(res);
+      basicRefresh();
+    }
+    bOperand = parseFloat(bCurrent);
+    bOperator = op;
+    bJustEvaled = false;
+    basicExpr(bCurrent + ' ' + opLabel);
+    bCurrent = '0';
+    basicRefresh();
+  }
+
+  function basicEquals() {
+    if (bOperand === null || bOperator === null) return;
+    var res = compute(bOperand, parseFloat(bCurrent), bOperator);
+    var opLabel = bOperator === '*' ? '×' : bOperator === '/' ? '÷' : bOperator === '-' ? '−' : '+';
+    basicExpr(bOperand + ' ' + opLabel + ' ' + bCurrent + ' =');
+    bCurrent = trimNum(res);
+    bOperand = null; bOperator = null; bJustEvaled = true;
+    basicRefresh();
+  }
+
+  function compute(a, b, op) {
+    if (op === '+') return a + b;
+    if (op === '-') return a - b;
+    if (op === '*') return a * b;
+    if (op === '/') return b === 0 ? NaN : a / b;
+    return b;
+  }
+
+  function trimNum(n) {
+    if (!isFinite(n)) return 'Error';
+    var s = parseFloat(n.toPrecision(12)).toString();
+    return s;
+  }
+
+  function basicClear() {
+    bCurrent = '0'; bOperand = null; bOperator = null; bJustEvaled = false;
+    basicExpr(''); basicRefresh();
+  }
+
+  function basicDel() {
+    if (bJustEvaled) return;
+    bCurrent = bCurrent.length > 1 ? bCurrent.slice(0, -1) : '0';
+    basicRefresh();
+  }
+
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    var active = document.querySelector('.panel.active');
+    if (!active) return;
+    var btn = active.querySelector('.solve-btn');
+    if (btn) btn.click();
+  });
+</script>
+</body>
+</html>
