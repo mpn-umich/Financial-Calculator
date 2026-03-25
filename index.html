@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simple Financial Calculator</title>
+<title>MP-1 Financial Calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -217,6 +217,25 @@
 
   .solve-btn:hover { opacity: 0.88; }
   .solve-btn:active { transform: scale(0.99); }
+
+  /* Clear inputs button */
+  .clear-inputs-btn {
+    width: 100%;
+    height: 38px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--error);
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .clear-inputs-btn:hover { background: #fce8e8; border-color: #e0b0b0; }
 
   /* Result box */
   .result-box {
@@ -492,7 +511,7 @@
       </div>
       <div>
         <div class="site-subtitle">Time Value of Money</div>
-        <div class="site-title">Simple Financial Calculator</div>
+        <div class="site-title">MP-1 Financial Calculator</div>
       </div>
     </div>
   </div>
@@ -528,6 +547,7 @@
           <input type="number" id="pv-pmt" placeholder="e.g. 50">
         </div>
       </div>
+      <button class="clear-inputs-btn" onclick="clearPanel('pv')">Clear</button>
       <button class="solve-btn" onclick="solvePV()">Calculate Present Value</button>
       <div class="result-box">
         <div class="result-label">Present Value</div>
@@ -557,6 +577,7 @@
           <input type="number" id="pmt-pv" placeholder="e.g. 800">
         </div>
       </div>
+      <button class="clear-inputs-btn" onclick="clearPanel('pmt')">Clear</button>
       <button class="solve-btn" onclick="solvePMT()">Calculate Payment (PMT)</button>
       <div class="result-box">
         <div class="result-label">Payment per Period</div>
@@ -586,6 +607,7 @@
           <input type="number" id="fv-pmt" placeholder="e.g. 50">
         </div>
       </div>
+      <button class="clear-inputs-btn" onclick="clearPanel('fv')">Clear</button>
       <button class="solve-btn" onclick="solveFV()">Calculate Future Value</button>
       <div class="result-box">
         <div class="result-label">Future Value</div>
@@ -625,6 +647,7 @@
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Add period
       </button>
+      <button class="clear-inputs-btn" onclick="clearPanel('pvcf')">Clear</button>
       <button class="solve-btn" onclick="solvePVCF()">Calculate Present Value</button>
       <div class="result-box">
         <div class="result-label">Present Value of Cash Flows</div>
@@ -892,6 +915,28 @@
     basicRefresh();
   }
 
+
+  function clearPanel(tab) {
+    if (tab === 'pv') {
+      ['pv-rate','pv-n','pv-fv','pv-pmt'].forEach(function(id) { document.getElementById(id).value = ''; });
+      var el = document.getElementById('pv-out'); el.className = 'result-value'; el.textContent = '—';
+    } else if (tab === 'pmt') {
+      ['pmt-rate','pmt-n','pmt-fv','pmt-pv'].forEach(function(id) { document.getElementById(id).value = ''; });
+      var el = document.getElementById('pmt-out'); el.className = 'result-value'; el.textContent = '—';
+    } else if (tab === 'fv') {
+      ['fv-rate','fv-n','fv-pv','fv-pmt'].forEach(function(id) { document.getElementById(id).value = ''; });
+      var el = document.getElementById('fv-out'); el.className = 'result-value'; el.textContent = '—';
+    } else if (tab === 'pvcf') {
+      document.getElementById('cf-rate').value = '';
+      for (var i = 3; i < cfCount; i++) {
+        var row = document.getElementById('cfrow-' + i);
+        if (row) row.parentNode.removeChild(row);
+      }
+      cfCount = 3;
+      ['cf-0','cf-1','cf-2'].forEach(function(id) { document.getElementById(id).value = ''; });
+      var el = document.getElementById('pvcf-out'); el.className = 'result-value'; el.textContent = '—';
+    }
+  }
 
   document.addEventListener('keydown', function(e) {
     if (e.key !== 'Enter') return;
