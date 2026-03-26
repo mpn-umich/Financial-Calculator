@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MP-1 Financial Calculator</title>
 <meta name="description" content="Time Value of Money calculator for EMBA students">
-<meta name="theme-color" content="#1a1814">
+<meta name="theme-color" content="#00274C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MP-1 Calc">
@@ -16,18 +16,18 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f5f3ef;
+    --bg: #f0f4f8;
     --surface: #ffffff;
-    --surface-2: #f0ede8;
-    --border: #e0dbd3;
-    --border-strong: #c8c2b8;
-    --text-primary: #1a1814;
-    --text-secondary: #6b6560;
-    --text-muted: #9e9790;
-    --accent: #1a1814;
-    --accent-light: #f0ede8;
-    --result-bg: #1a1814;
-    --result-text: #f5f3ef;
+    --surface-2: #e8eef5;
+    --border: #c2d0de;
+    --border-strong: #9ab0c8;
+    --text-primary: #00274C;
+    --text-secondary: #2a4a6b;
+    --text-muted: #7a9ab8;
+    --accent: #00274C;
+    --accent-light: #e8eef5;
+    --result-bg: #00274C;
+    --result-text: #FFCB05;
     --error: #b84040;
     --radius-sm: 6px;
     --radius-md: 10px;
@@ -52,8 +52,8 @@
     display: flex;
     align-items: flex-end;
     gap: 1rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
+    border-bottom: 1px solid #00274C;
+    background: #00274C;
   }
 
   .header-inner {
@@ -82,13 +82,13 @@
     font-family: 'DM Serif Display', serif;
     font-size: 1.35rem;
     font-weight: 400;
-    color: var(--text-primary);
+    color: #FFCB05;
     letter-spacing: -0.01em;
   }
 
   .site-subtitle {
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: rgba(255,203,5,0.6);
     font-weight: 300;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -138,9 +138,9 @@
   }
 
   .tab.active {
-    background: var(--surface);
-    color: var(--text-primary);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    background: #00274C;
+    color: #FFCB05;
+    box-shadow: 0 1px 4px rgba(0,39,76,0.18);
   }
 
   /* Panel */
@@ -199,7 +199,7 @@
   .field input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(26,24,20,0.07);
+    box-shadow: 0 0 0 3px rgba(0,39,76,0.12);
     background: var(--surface);
   }
 
@@ -215,8 +215,8 @@
     letter-spacing: 0.04em;
     border: none;
     border-radius: var(--radius-md);
-    background: var(--result-bg);
-    color: var(--result-text);
+    background: #FFCB05;
+    color: #00274C;
     cursor: pointer;
     margin-bottom: 1.5rem;
     transition: opacity 0.15s, transform 0.1s;
@@ -260,7 +260,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(245,243,239,0.45);
+    color: rgba(255,203,5,0.6);
     font-family: 'DM Mono', monospace;
   }
 
@@ -331,7 +331,7 @@
   .cf-row input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(26,24,20,0.07);
+    box-shadow: 0 0 0 3px rgba(0,39,76,0.12);
     background: var(--surface);
   }
 
@@ -388,9 +388,9 @@
     text-align: center;
     padding: 1.5rem 2rem;
     font-size: 0.75rem;
-    color: var(--text-muted);
-    border-top: 1px solid var(--border);
-    background: var(--surface);
+    color: rgba(255,203,5,0.7);
+    border-top: 1px solid #00274C;
+    background: #00274C;
   }
 
   /* 4-function calculator */
@@ -411,7 +411,7 @@
   .calc-expression {
     font-family: 'DM Mono', monospace;
     font-size: 0.95rem;
-    color: rgba(245,243,239,0.75);
+    color: rgba(255,203,5,0.75);
     min-height: 22px;
     word-break: break-all;
     letter-spacing: 0.02em;
@@ -460,9 +460,9 @@
   .key.op:hover { background: var(--surface-2); color: var(--text-primary); }
 
   .key.equals {
-    background: var(--result-bg);
-    color: var(--result-text);
-    border-color: var(--result-bg);
+    background: #FFCB05;
+    color: #00274C;
+    border-color: #FFCB05;
     font-size: 1.3rem;
   }
 
@@ -510,10 +510,10 @@
     <div style="display:flex; align-items:center; gap:12px;">
       <div class="logo-mark">
         <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="2" width="6" height="6" rx="1" fill="#f5f3ef"/>
-          <rect x="10" y="2" width="6" height="6" rx="1" fill="#f5f3ef" opacity="0.5"/>
-          <rect x="2" y="10" width="6" height="6" rx="1" fill="#f5f3ef" opacity="0.5"/>
-          <rect x="10" y="10" width="6" height="6" rx="1" fill="#f5f3ef"/>
+          <rect x="2" y="2" width="6" height="6" rx="1" fill="#FFCB05"/>
+          <rect x="10" y="2" width="6" height="6" rx="1" fill="#FFCB05" opacity="0.5"/>
+          <rect x="2" y="10" width="6" height="6" rx="1" fill="#FFCB05" opacity="0.5"/>
+          <rect x="10" y="10" width="6" height="6" rx="1" fill="#FFCB05"/>
         </svg>
       </div>
       <div>
