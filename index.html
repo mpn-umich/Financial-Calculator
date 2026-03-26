@@ -107,12 +107,22 @@
   /* Tab bar */
   .tab-bar {
     display: flex;
+    flex-direction: column;
     gap: 4px;
     margin-bottom: 2rem;
     background: var(--surface-2);
     padding: 4px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
+  }
+
+  .tab-row {
+    display: flex;
+    gap: 4px;
+  }
+
+  .tab-row-bottom .tab {
+    flex: 1;
   }
 
   .tab {
@@ -483,12 +493,23 @@
   .key.span2 { grid-column: span 2; }
 
   @media (max-width: 600px) {
-    header { padding: 1.5rem 1.25rem 1.25rem; }
-    main { padding: 1.75rem 1.25rem 3rem; }
-    .card { padding: 1.5rem 1.25rem; }
-    .field-grid { grid-template-columns: 1fr; gap: 1rem; }
-    .tab { font-size: 0.72rem; padding: 8px 6px; }
+    header { padding: 1rem 1.25rem 1rem; }
+    .header-inner { gap: 8px; }
+    .logo-mark { width: 30px; height: 30px; }
+    .site-subtitle { font-size: 0.65rem; margin-bottom: 1px; }
+    .site-title { font-size: 1.1rem; }
+    main { padding: 1rem 1rem 3rem; }
+    .tab-bar { margin-bottom: 1rem; }
+    .tab { font-size: 0.72rem; padding: 7px 6px; }
+    .card { padding: 1rem 1rem; }
+    .field-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+    .field input { height: 38px; font-size: 0.85rem; }
+    .field label { font-size: 0.62rem; }
+    .clear-inputs-btn { height: 34px; font-size: 0.78rem; margin-bottom: 0.5rem; }
+    .solve-btn { height: 40px; font-size: 0.85rem; margin-bottom: 1rem; }
+    .result-box { padding: 0.9rem 1rem; min-height: 60px; }
     .result-value { font-size: 1.5rem; }
+    .result-label { font-size: 0.6rem; }
     .cf-row { grid-template-columns: 90px 1fr 32px; }
   }
 
@@ -526,11 +547,15 @@
 
 <main>
   <div class="tab-bar">
-    <button class="tab active" onclick="switchTab('pv')">Solve for PV</button>
-    <button class="tab" onclick="switchTab('pmt')">Solve for PMT</button>
-    <button class="tab" onclick="switchTab('fv')">Solve for FV</button>
-    <button class="tab" onclick="switchTab('pvcf')">PV — Irregular CFs</button>
-    <button class="tab" onclick="switchTab('basic')">4-Function Calculator</button>
+    <div class="tab-row tab-row-top">
+      <button class="tab active" onclick="switchTab('pv')">Solve for PV</button>
+      <button class="tab" onclick="switchTab('pmt')">Solve for PMT</button>
+      <button class="tab" onclick="switchTab('fv')">Solve for FV</button>
+    </div>
+    <div class="tab-row tab-row-bottom">
+      <button class="tab" onclick="switchTab('pvcf')">PV — Irregular CFs</button>
+      <button class="tab" onclick="switchTab('basic')">4-Function Calculator</button>
+    </div>
   </div>
 
   <!-- PV Panel -->
